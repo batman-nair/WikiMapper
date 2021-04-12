@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from multiprocessing import Pool
 
 def is_non_meta_link(link):
     meta_flags = ['Wikipedia:', 'Category:', 'Image:', 'Talk:', 'Portal:', 'Help:', 'Special:', 'Book:', 'Template:', 'Template_talk:']
@@ -8,15 +9,10 @@ def is_non_meta_link(link):
     return not has_meta_link and not link.get('class', False)
 
 def extract_wiki_links(url: str):
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Max-Age': '3600',
-        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0'
-        }
-    req = requests.get(url, headers)
-    soup = BeautifulSoup(req.content, 'html.parser')
+    url = url.strip()
+    print('Parsing link', url)
+    wiki_page = requests.get(url)
+    soup = BeautifulSoup(wiki_page.content, 'html.parser')
     content_body = soup.find(id='mw-content-text')
     for naviagtion_section in content_body.find_all(role='navigation'):
         naviagtion_section.decompose()
@@ -26,7 +22,29 @@ def extract_wiki_links(url: str):
     wiki_links = map(lambda link: 'https://en.wikipedia.org'+link.get('href'), filtered_links)
     return list(wiki_links)
 
-wiki_links = extract_wiki_links('https://en.wikipedia.org/wiki/List_of_sovereign_states')
-with open('country_links', 'w') as ff:
-    ff.write('\n'.join(wiki_links))
-print('\n'.join(wiki_links))
+if __name__ == '__main__':
+    country_links = []
+    with open('country_links.txt', 'r') as countries_file:
+        country_links = set(countries_file.read().splitlines())
+
+    country_scores = {}
+    with open('source_links', 'w', encoding='utf-8') as source_file:
+        source_file.write('https://en.wikipedia.org/wiki/Australia')
+
+    pool = Pool(10)
+
+    for depth in range(1, 3):
+        with open('source_links', 'r', encoding='utf-8') as source_file, open('generated_links', 'w', encoding='utf-8') as generated_file:
+            for extracted_links in pool.imap(extract_wiki_links, source_file):
+                generated_file.write('\n'.join(extracted_links))
+
+        with open('generated_links', 'r', encoding='utf-8') as generated_file, open('source_links', 'w', encoding='utf-8') as source_file:
+            for link in generated_file:
+                link = link.strip()
+                if link in country_links:
+                    country_scores[link] = country_scores.get(link, 0) + 1/depth
+                else:
+                    source_file.write(link+'\n')
+
+    for country, score in country_scores.items():
+        print(country, score)
