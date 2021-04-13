@@ -22,8 +22,9 @@ def extract_wiki_links(url: str):
     return list(wiki_links)
 
 def get_page_title(url: str):
+    print('Fetching page title', url)
     url = url.strip()
     wiki_page = requests.get(url)
     soup = BeautifulSoup(wiki_page.content, 'html.parser')
     page_title = soup.title.text[:-12] # Remove ' - Wikipedia' from title
-    return page_title
+    return (url, page_title)
