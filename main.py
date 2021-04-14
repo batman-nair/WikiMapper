@@ -27,7 +27,6 @@ def process_interlink_scores(target_link: str, all_links: set, max_depth: int = 
 
 def generate_link_to_name_map(all_links):
     pool = Pool(cpu_count()*2)
-    # get_link_name = lambda link: (link, wiki_util.get_page_title(link))
     link_to_name_list = pool.map(wiki_util.get_page_title, all_links)
     link_to_name_map = dict(link_to_name_list)
     return link_to_name_map
@@ -35,7 +34,7 @@ def generate_link_to_name_map(all_links):
 if __name__ == '__main__':
     all_links = []
     output_directory = 'csv'
-    with open('country_links.txt', 'r') as countries_file:
+    with open('countries/country_links.txt', 'r') as countries_file:
         all_links = set(countries_file.read().splitlines())
 
     link_to_name_map = generate_link_to_name_map(all_links)
@@ -57,7 +56,7 @@ if __name__ == '__main__':
                 score_file.write(','.join([link_name, connection_name, str(score)]) + '\n')
         link_total_scores[link_to_name_map[link]] = total_score
 
-    with open(os.path.join(output_directory, 'node_list')) as node_file:
+    with open(os.path.join(output_directory, 'node_list'), 'w') as node_file:
         node_file.write('Id,Label,Count')
         for entry_name, total_score in entry_total_scores.items():
             node_file.write(','.join(entry_name, entry_name, int(total_score)))
