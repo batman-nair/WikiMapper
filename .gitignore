@@ -1,2 +1,6 @@
 __pycache__/
 *.py[cod]
+
+generated_links
+source_links
+*.csv
