@@ -46,7 +46,6 @@ if __name__ == '__main__':
         all_links = set(links_file.read().splitlines())
 
     link_to_name_map = generate_link_to_name_map(all_links, pool_size=args.jobs)
-    link_total_scores = dict()
 
     os.makedirs(output_directory, exist_ok=True)
 
@@ -54,17 +53,9 @@ if __name__ == '__main__':
         current_scores = process_interlink_scores(link, all_links, max_depth=args.depth, pool_size=args.jobs)
         print('Calculated scores for', link_to_name_map[link], ', writing to csv file.')
         csv_file = os.path.join(output_directory, link_to_name_map[link]+'.csv')
-        total_score = 0
         with open(csv_file, 'w', encoding='utf-8') as score_file:
             score_file.write('Source,Target,Weight\n')
             link_name = link_to_name_map[link]
             for link, score in current_scores.items():
-                total_score += score
                 connection_name = link_to_name_map[link]
                 score_file.write(','.join([link_name, connection_name, str(score)]) + '\n')
-        link_total_scores[link_to_name_map[link]] = total_score
-
-    with open(os.path.join(output_directory, 'node_list.csv'), 'w') as node_file:
-        node_file.write('Id,Label,Count')
-        for link_name, total_score in link_total_scores.items():
-            node_file.write(','.join([link_name, link_name, int(total_score)]))

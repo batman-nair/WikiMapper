@@ -31,5 +31,5 @@ def get_clean_page_title(url: str):
     soup = BeautifulSoup(wiki_page.content, 'html.parser')
     page_title = soup.title.text[:-12] # Remove ' - Wikipedia' from title
     page_title = page_title.strip()
-    page_title = re.sub(r'[\\;/]', '_', page_title)
+    page_title = re.sub(r'[\\;:/]', '_', page_title)
     return (url, page_title)
