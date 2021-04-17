@@ -1,4 +1,5 @@
 import os
+import argparse
 from multiprocessing import Pool, cpu_count
 
 import src.wiki_util as wiki_util
@@ -32,10 +33,16 @@ def generate_link_to_name_map(all_links):
     return link_to_name_map
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Generate csv of wiki links connection with weights based on number of direct/indirect connections between them.')
+    parser.add_argument('-i', '--input', type=str, default='input.txt', help='path to file with links')
+    parser.add_argument('-d', '--depth', type=int, default=2, help='maximum depth that should be parsed')
+    parser.add_argument('-o', '--output', type=str, default='csv', help='output directory to store the csv files')
+    args = parser.parse_args()
+
     all_links = []
-    output_directory = 'csv'
-    with open('countries/country_links.txt', 'r') as countries_file:
-        all_links = set(countries_file.read().splitlines())
+    output_directory = args.output
+    with open(args.input, 'r') as links_file:
+        all_links = set(links_file.read().splitlines())
 
     link_to_name_map = generate_link_to_name_map(all_links)
     link_total_scores = dict()
@@ -43,7 +50,7 @@ if __name__ == '__main__':
     os.makedirs(output_directory, exist_ok=True)
 
     for link in all_links:
-        current_scores = process_interlink_scores(link, all_links, max_depth=2)
+        current_scores = process_interlink_scores(link, all_links, max_depth=args.depth)
         print('Calculated scores for', link_to_name_map[link], ', writing to csv file.')
         csv_file = os.path.join(output_directory, link_to_name_map[link]+'.csv')
         total_score = 0
