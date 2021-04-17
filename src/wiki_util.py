@@ -12,7 +12,7 @@ def _is_non_meta_link(link):
 @functools.lru_cache(maxsize=500)
 def extract_wiki_links(url: str):
     url = url.strip()
-    # print('Parsing link', url)
+    print('Parsing link', url)
     wiki_page = requests.get(url)
     soup = BeautifulSoup(wiki_page.content, 'html.parser')
     content_body = soup.find(id='mw-content-text')
