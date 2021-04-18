@@ -1,7 +1,7 @@
 ## Map generated for countries of the world
 
+[Alternate link for image](https://postimg.cc/ftQCyrf0)
 ![Countries Map](countries_map.png)
-[Alternate link for map](https://postimg.cc/ftQCyrf0)
 
 ![countries_legend.png](countries_legend.png)
 
